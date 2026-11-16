@@ -122,7 +122,7 @@ export const AboutContactModal: React.FC = () => {
                 <>
                   <a
                     href={`mailto:${siteConfig.developerEmail}?subject=${encodeURIComponent(
-                      `Eye-on-CI Feedback`,
+                      `EYE-on-CI Feedback`,
                     )}`}
                     className="inline-flex items-center gap-1.5 rounded-xl bg-[#4F46E5] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#3730A3] whitespace-nowrap"
                   >

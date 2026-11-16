@@ -1,8 +1,8 @@
-# Eye-on-CI v2.0
+# EYE-on-CI v2.0
 
-**Eye-on-CI** היא מערכת רפלקציה, תיעוד וחקירה סומטית לקונטקט אימפרוביזציה (Contact Improvisation) ולדיאלוג תנועתי.
+**EYE-on-CI** היא מערכת רפלקציה, תיעוד וחקירה סומטית לקונטקט אימפרוביזציה (Contact Improvisation) ולדיאלוג תנועתי.
 
-**Eye-on-CI** is a bilingual (Hebrew / English) somatic reflection, guided practice, and research suite for Contact Improvisation dancers, facilitators, and 1:1 movement clinics.
+**EYE-on-CI** is a bilingual (Hebrew / English) somatic reflection, guided practice, and research suite for Contact Improvisation dancers, facilitators, and 1:1 movement clinics.
 
 ---
 

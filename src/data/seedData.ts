@@ -1207,8 +1207,8 @@ export const SOMATIC_GUIDE_TOPICS: SomaticGuideTopic[] = [
   {
     id: 'GUIDE_APP_OVERVIEW',
     guideSection: 'philosophy',
-    titleHe: 'מדריך Eye-on-CI · תפיסה ומבנה',
-    titleEn: 'Eye-on-CI v2.0 · Philosophy & Architecture',
+    titleHe: 'מדריך EYE-on-CI · תפיסה ומבנה',
+    titleEn: 'EYE-on-CI v2.0 · Philosophy & Architecture',
     subtitleHe: 'חיבור בין נוכחות רכה כאן ועכשיו לבין מודל ויסות Under ↔ Flow ↔ Over',
     subtitleEn: 'Uniting non-numeric Here & Now presence with Under ↔ Flow ↔ Over regulation',
     goalHe: 'להעניק לרקדנים ומדריכים מצפן שפתי ותחושתי רך המבחין בין קושי של תת-ויסות (Under) לקושי של עודף (Over), בלי ציונים הישגיים.',
@@ -1216,9 +1216,9 @@ export const SOMATIC_GUIDE_TOPICS: SomaticGuideTopic[] = [
     mechanismHe: 'מערכת תלת-קוטבית: קוטב שמאלי Under (-5) · מרכז שיא Flow (0) · קוטב ימני Over (+5) על פני 5 צירי עומק ו-150 פרמטרים.',
     mechanismEn: 'Tri-polar regulation model: Under (-5) ↔ integrative Flow (0 center ring) ↔ Over (+5) across 5 macro-axes and 150 diagnostic parameters.',
     explanationHe:
-      'במקום לדרוש מרקדן "ציון 1 עד 10", Eye-on-CI מבחינה שכל קושי בתנועה נובע מאחת משתי נטיות קוטביות: תת-תגובה (החזקה, נוקשות, קפיאה, ריצוי שבשתיקה) או תגובת יתר (קריסה, הצפה, פזיזות, משטור נוקשה). שיא האינטגרציה אינו "10" גבוה אלא השקיעה הערנית אל מרכז ה־Flow (0).',
+      'במקום לדרוש מרקדן "ציון 1 עד 10", EYE-on-CI מבחינה שכל קושי בתנועה נובע מאחת משתי נטיות קוטביות: תת-תגובה (החזקה, נוקשות, קפיאה, ריצוי שבשתיקה) או תגובת יתר (קריסה, הצפה, פזיזות, משטור נוקשה). שיא האינטגרציה אינו "10" גבוה אלא השקיעה הערנית אל מרכז ה־Flow (0).',
     explanationEn:
-      'Rather than grading movement 1–10, Eye-on-CI recognizes that imbalance occurs at two poles: Under-regulation (bracing, freeze, silent compliance) or Over-regulation (weight dumping, sensory flood, rigid policing). Mastery lives at the poised central Flow ring (0).',
+      'Rather than grading movement 1–10, EYE-on-CI recognizes that imbalance occurs at two poles: Under-regulation (bracing, freeze, silent compliance) or Over-regulation (weight dumping, sensory flood, rigid policing). Mastery lives at the poised central Flow ring (0).',
     ratingLevels: [],
     practicalTipsHe: [
       'עבור בין 4 עדשות המדריך למעלה: פילוסופיה ומבנה, 5 הצירים ו-150 הפרמטרים, ספריית התרגולים (Scores), וסטודיו מנהל.',
@@ -1556,11 +1556,11 @@ export function getGuideTopicById(id: SomaticGuideTopicId): SomaticGuideTopic {
 
 export const DEFAULT_SITE_CONFIG: SiteContentConfig = {
   id: 'main',
-  brandName: 'Eye-on-CI',
+  brandName: 'EYE-on-CI',
   brandTaglineHe: 'מצפן סומטי לקונטקט אימפרוביזציה',
   brandTaglineEn: 'Somatic Compass for Contact Improvisation',
-  homeKickerHe: 'כאן ועכשיו ב־Eye-on-CI',
-  homeKickerEn: 'Eye-on-CI · Here & Now',
+  homeKickerHe: 'כאן ועכשיו ב־EYE-on-CI',
+  homeKickerEn: 'EYE-on-CI · Here & Now',
   homeTitleHe: 'מרחב רך להקשבה, תנועה ואימפרוביזציה במגע',
   homeTitleEn: 'A Soft Space for Listening, Movement & Contact',
   homeSubtitleHe:
@@ -1569,12 +1569,12 @@ export const DEFAULT_SITE_CONFIG: SiteContentConfig = {
     'Tri-polar reflection (Under ↔ Flow ↔ Over) across 5 somatic axes & 150 parameters, 6 guided Scores, and mindful presence.',
   practiceSectionTitleHe: 'כרטיסיות תרגול ו־6 ה־Scores המודרכים',
   practiceSectionTitleEn: 'Practice Cards & 6 Interactive Scores',
-  aboutTitleHe: 'אודות Eye-on-CI',
-  aboutTitleEn: 'About Eye-on-CI',
+  aboutTitleHe: 'אודות EYE-on-CI',
+  aboutTitleEn: 'About EYE-on-CI',
   aboutDescriptionHe:
-    'Eye-on-CI היא סביבת מחקר, תרגול ורפלקציה לרקדני אימפרוביזציה במגע. המערכת מחברת את מסורת פקסטון, לפקוף, BMC/ג׳והאן, דימוק, דמאסיו/גאלזה, קיו, בליי וארנדט אל מצפן תלת-קוטבי מכיל (Under ↔ Flow ↔ Over), תרגול קילוף התפוז (Zohar R.) ומחקר עומק של 150 פרמטרים.',
+    'EYE-on-CI היא סביבת מחקר, תרגול ורפלקציה לרקדני אימפרוביזציה במגע. המערכת מחברת את מסורת פקסטון, לפקוף, BMC/ג׳והאן, דימוק, דמאסיו/גאלזה, קיו, בליי וארנדט אל מצפן תלת-קוטבי מכיל (Under ↔ Flow ↔ Over), תרגול קילוף התפוז (Zohar R.) ומחקר עומק של 150 פרמטרים.',
   aboutDescriptionEn:
-    'Eye-on-CI is a somatic reflection lab for Contact Improvisation dancers. It weaves Paxton, Lepkoff, BMC/Juhan, Dimock, Damasio/Gallese, Keogh, Bly, and Arendt into a humane tri-polar compass (Under ↔ Flow ↔ Over), Keluf practice (Zohar R.), and 150 study parameters.',
+    'EYE-on-CI is a somatic reflection lab for Contact Improvisation dancers. It weaves Paxton, Lepkoff, BMC/Juhan, Dimock, Damasio/Gallese, Keogh, Bly, and Arendt into a humane tri-polar compass (Under ↔ Flow ↔ Over), Keluf practice (Zohar R.), and 150 study parameters.',
   aboutPhilosophyHe:
     'ללא דירוגי הישגיות וללא מבחן: שיא הבשלות היא איכות Flow מאוזנת וקשובה בין תת-תגובה לעודף, עם זכות תמידית להאט ולפגוש "ידית דלת" פתוחה.',
   aboutPhilosophyEn:

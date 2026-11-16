@@ -1,5 +1,5 @@
 {
-  "name": "Eye-on-CI",
+  "name": "EYE-on-CI",
   "description": "Self-reflection suite for Contact Improvisation and dyadic physical interaction. Tracks subtle shifts in body weight, contact points, boundaries, and movement dialogue.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

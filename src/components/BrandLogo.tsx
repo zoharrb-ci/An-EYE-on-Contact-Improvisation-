@@ -7,7 +7,7 @@ interface BrandLogoProps {
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
-  alt = 'Eye-on-CI Logo',
+  alt = 'EYE-on-CI Logo',
   className = 'h-9 w-9 object-contain',
 }) => {
   const [stage, setStage] = useState<'data' | 'file' | 'svg'>('data');

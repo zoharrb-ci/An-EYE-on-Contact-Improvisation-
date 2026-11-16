@@ -100,7 +100,7 @@ const AppShell: React.FC = () => {
         <aside className="hidden w-60 shrink-0 flex-col justify-between border-e border-[#DCE8F5] bg-white p-5 lg:flex">
           <div>
             <div className="flex items-center gap-3 px-2 py-1">
-              <BrandLogo alt="Eye-on-CI Logo" className="h-9 w-9 object-contain" />
+              <BrandLogo alt="EYE-on-CI Logo" className="h-9 w-9 object-contain" />
               <div>
                 <div className="font-display text-base font-extrabold tracking-tight text-[#3730A3]">
                   {siteConfig.brandName}
@@ -195,7 +195,7 @@ const AppShell: React.FC = () => {
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-2 border-b border-[#DCE8F5] bg-white/95 px-3.5 backdrop-blur-xs sm:h-16 sm:px-6">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <div className="flex shrink-0 items-center lg:hidden">
-                <BrandLogo alt="Eye-on-CI" className="h-7 w-7 object-contain" />
+                <BrandLogo alt="EYE-on-CI" className="h-7 w-7 object-contain" />
               </div>
               <span
                 className="font-display truncate text-base font-bold sm:text-lg"

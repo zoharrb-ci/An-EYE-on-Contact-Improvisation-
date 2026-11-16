@@ -1002,7 +1002,10 @@ export function subscribeSiteConfig(onChange: (config: SiteContentConfig | null)
       const rawBrand = typeof d.brandName === 'string' ? d.brandName.trim() : '';
       onChange({
         id: d.id || 'main',
-        brandName: !rawBrand || rawBrand === 'Contact Ways' ? 'Eye-on-CI' : rawBrand,
+        brandName:
+          !rawBrand || rawBrand === 'Contact Ways' || rawBrand === 'Eye-on-CI'
+            ? 'EYE-on-CI'
+            : rawBrand,
         brandTaglineHe: d.brandTaglineHe || '',
         brandTaglineEn: d.brandTaglineEn || '',
         homeKickerHe: d.homeKickerHe || '',
@@ -1014,12 +1017,16 @@ export function subscribeSiteConfig(onChange: (config: SiteContentConfig | null)
         practiceSectionTitleHe: d.practiceSectionTitleHe || '',
         practiceSectionTitleEn: d.practiceSectionTitleEn || '',
         aboutTitleHe:
-          !d.aboutTitleHe || d.aboutTitleHe.includes('Contact Ways')
-            ? 'אודות Eye-on-CI'
+          !d.aboutTitleHe ||
+          d.aboutTitleHe.includes('Contact Ways') ||
+          d.aboutTitleHe.includes('Eye-on-CI')
+            ? 'אודות EYE-on-CI'
             : d.aboutTitleHe,
         aboutTitleEn:
-          !d.aboutTitleEn || d.aboutTitleEn.includes('Contact Ways')
-            ? 'About Eye-on-CI'
+          !d.aboutTitleEn ||
+          d.aboutTitleEn.includes('Contact Ways') ||
+          d.aboutTitleEn.includes('Eye-on-CI')
+            ? 'About EYE-on-CI'
             : d.aboutTitleEn,
         aboutDescriptionHe: d.aboutDescriptionHe || '',
         aboutDescriptionEn: d.aboutDescriptionEn || '',
@@ -1052,19 +1059,19 @@ export async function publishSiteConfig(
     const existingSnap = await getDoc(ref);
     await setDoc(ref, {
       id: 'main',
-      brandName: (config.brandName.trim() || 'Eye-on-CI').slice(0, 120),
+      brandName: (config.brandName.trim() || 'EYE-on-CI').slice(0, 120),
       brandTaglineHe: config.brandTaglineHe.slice(0, 160),
       brandTaglineEn: config.brandTaglineEn.slice(0, 160),
       homeKickerHe: config.homeKickerHe.slice(0, 160),
       homeKickerEn: config.homeKickerEn.slice(0, 160),
-      homeTitleHe: (config.homeTitleHe.trim() || 'Eye-on-CI').slice(0, 200),
-      homeTitleEn: (config.homeTitleEn.trim() || 'Eye-on-CI').slice(0, 200),
+      homeTitleHe: (config.homeTitleHe.trim() || 'EYE-on-CI').slice(0, 200),
+      homeTitleEn: (config.homeTitleEn.trim() || 'EYE-on-CI').slice(0, 200),
       homeSubtitleHe: config.homeSubtitleHe.slice(0, 600),
       homeSubtitleEn: config.homeSubtitleEn.slice(0, 600),
       practiceSectionTitleHe: (config.practiceSectionTitleHe.trim() || 'כרטיסיות תרגול ופעילות מומלצת').slice(0, 160),
       practiceSectionTitleEn: (config.practiceSectionTitleEn.trim() || 'Practice Cards & Recommended Activities').slice(0, 160),
-      aboutTitleHe: (config.aboutTitleHe.trim() || 'אודות Eye-on-CI').slice(0, 200),
-      aboutTitleEn: (config.aboutTitleEn.trim() || 'About Eye-on-CI').slice(0, 200),
+      aboutTitleHe: (config.aboutTitleHe.trim() || 'אודות EYE-on-CI').slice(0, 200),
+      aboutTitleEn: (config.aboutTitleEn.trim() || 'About EYE-on-CI').slice(0, 200),
       aboutDescriptionHe: config.aboutDescriptionHe.slice(0, 3000),
       aboutDescriptionEn: config.aboutDescriptionEn.slice(0, 3000),
       aboutPhilosophyHe: config.aboutPhilosophyHe.slice(0, 1500),
