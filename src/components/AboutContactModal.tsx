@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { useContactWays } from '../context/ContactWaysContext';
+import { BrandLogo } from './BrandLogo';
 
 export const AboutContactModal: React.FC = () => {
   const {
@@ -62,8 +63,7 @@ export const AboutContactModal: React.FC = () => {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-[#DCE8F5] bg-[#FBFDFF] px-6 py-4">
           <div className="flex items-center gap-3">
-            <img
-              src="/assets/ci_logo_frameless.png"
+            <BrandLogo
               alt={siteConfig.brandName}
               className="h-9 w-9 shrink-0 object-contain"
             />

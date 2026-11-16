@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   BookOpen,
   Cloud,
@@ -13,6 +13,8 @@ import {
   User,
 } from 'lucide-react';
 import { ContactWaysProvider, useContactWays } from './context/ContactWaysContext';
+import { BRAND_LOGO_DATA_URI } from './assets/brandLogo';
+import { BrandLogo } from './components/BrandLogo';
 import { AppNavTab } from './types/contactWays';
 import { getLanguageMeta } from './i18n/languages';
 import { HomeView } from './views/HomeView';
@@ -22,7 +24,6 @@ import { InquiriesView } from './views/InquiriesView';
 import { ProgressView } from './views/ProgressView';
 import { ProfileView } from './views/ProfileView';
 import { ManagerStudioView } from './views/ManagerStudioView';
-import { WeightTransferIntro } from './components/WeightTransferIntro';
 import { LanguageSearchModal } from './components/LanguageSearchModal';
 import { StorageExplainerModal } from './components/StorageExplainerModal';
 import { SmallDanceMeditationDialog } from './components/SmallDanceMeditationDialog';
@@ -34,7 +35,6 @@ import { AboutContactModal } from './components/AboutContactModal';
 
 const AppShell: React.FC = () => {
   const {
-    showIntro,
     activeTab,
     setActiveTab,
     isActiveManager,
@@ -53,7 +53,6 @@ const AppShell: React.FC = () => {
     tr,
   } = useContactWays();
 
-  const [logoError, setLogoError] = useState(false);
   const langMeta = getLanguageMeta(language);
 
   const navItems: Array<{
@@ -83,16 +82,15 @@ const AppShell: React.FC = () => {
 
   const activeNav = navItems.find((n) => n.id === activeTab) || navItems[0];
 
-  // When intro is open, render only the intro + modals so no duplicate body scrollbar appears on the right
-  if (showIntro) {
-    return (
-      <>
-        <WeightTransferIntro />
-        <LanguageSearchModal />
-        <StorageExplainerModal />
-      </>
-    );
-  }
+  useEffect(() => {
+    let iconLink = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+    if (!iconLink) {
+      iconLink = document.createElement('link');
+      iconLink.rel = 'icon';
+      document.head.appendChild(iconLink);
+    }
+    iconLink.href = BRAND_LOGO_DATA_URI;
+  }, []);
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#FBFDFF] text-[#1E293B]">
@@ -102,18 +100,7 @@ const AppShell: React.FC = () => {
         <aside className="hidden w-60 shrink-0 flex-col justify-between border-e border-[#DCE8F5] bg-white p-5 lg:flex">
           <div>
             <div className="flex items-center gap-3 px-2 py-1">
-              {!logoError ? (
-                <img
-                  src="/assets/ci_logo_frameless.png"
-                  alt="Contact Ways Logo"
-                  onError={() => setLogoError(true)}
-                  className="h-9 w-9 object-contain"
-                />
-              ) : (
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#4F46E5] text-sm font-bold text-white">
-                  c-i
-                </span>
-              )}
+              <BrandLogo alt="Contact Ways Logo" className="h-9 w-9 object-contain" />
               <div>
                 <div className="font-display text-base font-extrabold tracking-tight text-[#3730A3]">
                   {siteConfig.brandName}
@@ -208,16 +195,7 @@ const AppShell: React.FC = () => {
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-2 border-b border-[#DCE8F5] bg-white/95 px-3.5 backdrop-blur-xs sm:h-16 sm:px-6">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <div className="flex shrink-0 items-center lg:hidden">
-                {!logoError ? (
-                  <img
-                    src="/assets/ci_logo_frameless.png"
-                    alt="Contact Ways"
-                    onError={() => setLogoError(true)}
-                    className="h-7 w-7 object-contain"
-                  />
-                ) : (
-                  <span className="text-sm font-bold text-[#4F46E5]">c-i</span>
-                )}
+                <BrandLogo alt="Contact Ways" className="h-7 w-7 object-contain" />
               </div>
               <span
                 className="font-display truncate text-base font-bold sm:text-lg"

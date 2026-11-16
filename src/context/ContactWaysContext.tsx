@@ -246,7 +246,7 @@ export const ContactWaysProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [language, setLanguageState] = useState<AppLanguageCode>(
     savedPrefs.language || detectInitialLanguage(initialLocality),
   );
-  const [showIntro, setShowIntro] = useState<boolean>(!savedPrefs.hasDismissedIntro);
+  const [showIntro, setShowIntro] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<AppNavTab>('home');
   const [activeGuideTopic, setActiveGuideTopic] = useState<SomaticGuideTopicId | null>(null);
   const [activeScoreId, setActiveScoreId] = useState<GuidedScoreId | null>(null);
@@ -1040,34 +1040,45 @@ export const ContactWaysProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
       setSendingInquiryId(inquiryId);
       try {
-        const res = await fetch('/api/somatic-guide', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            inquiryTitle: language === 'he' ? inq.title : inq.titleEn || inq.title,
-            category: language === 'he' ? inq.category : inq.categoryEn || inq.category,
-            somaticPrinciple:
-              language === 'he' ? inq.somaticPrinciple : inq.somaticPrincipleEn || inq.somaticPrinciple,
-            authorReference: inq.authorReference,
-            language,
-            history: [...inq.messages, userMsg].slice(-6),
-            message: trimmed,
-          }),
-        });
-        const data = (await res.json()) as { reply?: string; insight?: string };
+        let replyText = '';
+        let insightText = '';
+        try {
+          const res = await fetch(`${import.meta.env.BASE_URL}api/somatic-guide`.replace('//api', '/api'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              inquiryTitle: language === 'he' ? inq.title : inq.titleEn || inq.title,
+              category: language === 'he' ? inq.category : inq.categoryEn || inq.category,
+              somaticPrinciple:
+                language === 'he' ? inq.somaticPrinciple : inq.somaticPrincipleEn || inq.somaticPrinciple,
+              authorReference: inq.authorReference,
+              language,
+              history: [...inq.messages, userMsg].slice(-6),
+              message: trimmed,
+            }),
+          });
+          if (res.ok) {
+            const data = (await res.json()) as { reply?: string; insight?: string };
+            replyText = data.reply || '';
+            insightText = data.insight || '';
+          }
+        } catch {
+          // Static host (e.g. GitHub Pages) fallback
+        }
+
         const guideMsg: ConversationInquiry['messages'][number] = {
           id: `msg-${Date.now()}-g`,
           senderName: tr('מדריך סומטי (ci-eye)', 'Somatic Guide (ci-eye)'),
           isGuide: true,
           text:
-            data.reply ||
+            replyText ||
             tr(
-              'תודה על ההתבוננות. שים לב איך הנשימה משתנה כשאתה פוגש קרקע.',
-              'Thank you for noticing that sensation. Feel how your breath shifts as you meet the ground.',
+              'תודה על ההתבוננות הסומטית. נסה/י להבחין כיצד הנשימה והמשקל מתארגנים בין Under, Flow ו־Over ברגע זה.',
+              'Thank you for noticing that sensation. Feel how your breath and weight organize between Under, Flow, and Over in this moment.',
             ),
           timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
-        const newInsight = data.insight || `${trimmed.slice(0, 60)}`;
+        const newInsight = insightText || `${trimmed.slice(0, 60)}`;
 
         setLocalInquiryAddons((prev) => {
           const cur = prev[inquiryId] || { messages: [], summaryInsights: [] };

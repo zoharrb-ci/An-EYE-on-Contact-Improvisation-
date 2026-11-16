@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Info, PlusCircle } from 'lucide-react';
 import { useContactWays } from '../context/ContactWaysContext';
+import { BrandLogo } from '../components/BrandLogo';
 
 interface HereAndNowQuote {
   titleHe: string;
@@ -71,7 +72,6 @@ export const HomeView: React.FC = () => {
   } = useContactWays();
 
   const isHe = language === 'he';
-  const [logoError, setLogoError] = useState(false);
 
   const [quoteIndex, setQuoteIndex] = useState<number>(
     () => Math.floor(Date.now() / 60000) % HERE_AND_NOW_QUOTES.length,
@@ -91,18 +91,10 @@ export const HomeView: React.FC = () => {
     <div className="mx-auto flex min-h-[calc(100dvh-11rem)] max-w-2xl flex-col items-center justify-center px-4 py-12 text-center sm:py-20">
       {/* Large Enlarged Logo with Generous Breathing Space */}
       <div className="flex flex-col items-center gap-4">
-        {!logoError ? (
-          <img
-            src="/assets/ci_logo_frameless.png"
-            alt={siteConfig.brandName || 'Contact Ways'}
-            onError={() => setLogoError(true)}
-            className="h-28 w-28 object-contain sm:h-36 sm:w-36"
-          />
-        ) : (
-          <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-[#4F46E5] text-3xl font-bold text-white sm:h-36 sm:w-36">
-            c-i
-          </div>
-        )}
+        <BrandLogo
+          alt={siteConfig.brandName || 'Contact Ways'}
+          className="h-28 w-28 object-contain sm:h-36 sm:w-36"
+        />
         <span className="font-display text-sm font-semibold tracking-wide text-[#475569]/80">
           {siteConfig.brandName}
         </span>

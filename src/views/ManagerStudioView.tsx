@@ -366,21 +366,73 @@ export const ManagerStudioView: React.FC = () => {
     setErrorMsg(null);
     setStatusMsg(null);
     try {
-      const res = await fetch('/api/manager/ingest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rawText,
-          sourceTitle: rawSourceTitle || 'NotebookLM Study Note',
-          targetKind: importTargetKind,
-        }),
-      });
-      const data = (await res.json()) as { structured?: Record<string, unknown>; error?: string };
-      if (!res.ok || !data.structured) {
-        throw new Error(data.error || 'Could not structure source text.');
+      let s: Record<string, unknown> | null = null;
+      try {
+        const res = await fetch('/api/manager/ingest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rawText,
+            sourceTitle: rawSourceTitle || 'NotebookLM Study Note',
+            targetKind: importTargetKind,
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { structured?: Record<string, unknown> };
+          if (data.structured) s = data.structured;
+        }
+      } catch {
+        // Static host fallback (GitHub Pages)
       }
 
-      const s = data.structured;
+      if (!s) {
+        const cleaned = rawText.replace(/\r\n/g, '\n').trim();
+        const lines = cleaned.split('\n').map((l) => l.trim()).filter(Boolean);
+        const firstHeading = (lines[0] || rawSourceTitle || 'Contact Improvisation Study Note')
+          .replace(/^#+\s*/, '')
+          .slice(0, 120);
+        const bodySnippet = lines.slice(1).join(' ').slice(0, 600) || cleaned.slice(0, 600);
+        const bullets = lines
+          .filter((l) => /^[-*•\d.]/.test(l))
+          .map((l) => l.replace(/^[-*•\d.]+\s*/, '').slice(0, 180))
+          .slice(0, 4);
+        s =
+          importTargetKind === 'recommendation'
+            ? {
+                shortTitle: firstHeading,
+                shortTitleEn: firstHeading,
+                subtitleTag: rawSourceTitle || 'תרגול סומטי מיובא',
+                subtitleTagEn: rawSourceTitle || 'Imported Somatic Practice',
+                axisType: 'perception',
+                summaryPreview: bodySnippet.slice(0, 140),
+                fullExplanation: cleaned.slice(0, 2000),
+                fullExplanationEn: cleaned.slice(0, 2000),
+                practicalSteps: bullets.length ? bullets : [bodySnippet.slice(0, 180)],
+                practicalStepsEn: bullets.length ? bullets : [bodySnippet.slice(0, 180)],
+                quoteText: firstHeading,
+                quoteTextEn: firstHeading,
+                quoteAuthor: rawSourceTitle || 'NotebookLM',
+                quoteAuthorEn: rawSourceTitle || 'NotebookLM',
+              }
+            : {
+                title: firstHeading,
+                titleEn: firstHeading,
+                category: 'מחקר סומטי',
+                categoryEn: 'Somatic Study',
+                subtitle: rawSourceTitle || 'מקור מיובא',
+                subtitleEn: rawSourceTitle || 'Imported Source',
+                relatedStudyQuestion: `מהו העיקרון התנועתי המרכזי מתוך "${firstHeading}"?`,
+                relatedStudyQuestionEn: `What core movement principle emerges from "${firstHeading}"?`,
+                somaticPrinciple: bodySnippet.slice(0, 400) || firstHeading,
+                somaticPrincipleEn: bodySnippet.slice(0, 400) || firstHeading,
+                authorReference: rawSourceTitle || 'NotebookLM',
+                summaryInsights: bullets.length ? bullets : [bodySnippet.slice(0, 200)],
+                summaryInsightsEn: bullets.length ? bullets : [bodySnippet.slice(0, 200)],
+                initialGuidePrompt: `נחקור יחד את "${firstHeading}".`,
+                initialGuidePromptEn: `Let us explore "${firstHeading}" together.`,
+              };
+      }
+
       if (importTargetKind === 'recommendation') {
         setRecForm({
           id: `rec-imp-${Date.now()}`,

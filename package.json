@@ -1,15 +1,18 @@
 {
-  "name": "react-example",
+  "name": "contact-ways",
+  "description": "Contact Ways (ci-eye) v2.0 — Somatic Contact Improvisation Reflection Suite",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "start": "node server.ts",
+    "start:prod": "NODE_ENV=production tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "lint:rules": "eslint firestore.rules"
   },
   "dependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",

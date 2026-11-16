@@ -33,7 +33,7 @@ export const WeightTransferIntro: React.FC = () => {
         <div className="flex min-w-0 items-center gap-2">
           {!imgError ? (
             <img
-              src="/assets/ci_logo_frameless.png"
+              src={`${import.meta.env.BASE_URL}assets/ci_logo_frameless.png`}
               alt="Contact Ways Logo"
               onError={() => setImgError(true)}
               className="h-8 w-8 shrink-0 object-contain"
@@ -85,7 +85,7 @@ export const WeightTransferIntro: React.FC = () => {
           <div className="relative w-full overflow-hidden rounded-2xl border border-[#DCE8F5] bg-white p-2 sm:p-3 shadow-xs">
             <img
               key={gifCycleKey}
-              src={`/assets/video_cuts/intro_clean_duet.gif?cycle=${gifCycleKey}`}
+              src={`${import.meta.env.BASE_URL}assets/video_cuts/intro_clean_duet.gif?cycle=${gifCycleKey}`}
               alt={tr('אנימציית אימפרוביזציה במגע', 'Contact Improvisation animation')}
               className="mx-auto h-52 w-full object-contain bg-white sm:h-64"
             />

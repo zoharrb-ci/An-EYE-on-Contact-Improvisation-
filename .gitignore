@@ -1,8 +1,29 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 build/
 dist/
 coverage/
-.DS_Store
-*.log
+server.js
+
+# Environment variables
 .env*
 !.env.example
+
+# AI Studio & local artifacts
+.aistudio/
+public/assets/aistudio/
+
+# Firebase & logs
+*.log
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
