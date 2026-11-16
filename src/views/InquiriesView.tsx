@@ -91,12 +91,12 @@ export const InquiriesView: React.FC = () => {
       <section className="flex items-center justify-between gap-3 rounded-2xl border border-[#DCE8F5] bg-white px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-2 min-w-0">
           <h1 className="font-display truncate text-lg font-bold text-[#6D28D9] sm:text-xl">
-            {tr('חקירות ודיאלוגים סומטיים', 'Somatic Inquiries')}
+            {tr('חקר ודיאלוגים סומטיים', 'Somatic Inquiries')}
           </h1>
           <button
             type="button"
             onClick={() => openGuideTopic('GUIDE_INQUIRIES_MODES')}
-            aria-label={tr('מדריך מצבי חקירה', 'Inquiries guide')}
+            aria-label={tr('מדריך מצבי חקר', 'Inquiries guide')}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F0F7FF] hover:text-[#2A82C5]"
           >
             <Info className="h-4 w-4" />
@@ -315,7 +315,7 @@ export const InquiriesView: React.FC = () => {
           className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-[#6D28D9]/45 bg-white py-3 text-xs font-semibold text-[#6D28D9] hover:bg-violet-50/40"
         >
           <Plus className="h-4 w-4" />
-          <span>{tr('עוד חקירות (+3)', 'More Inquiries (+3)')}</span>
+          <span>{tr('עוד נושאי חקר (+3)', 'More Inquiries (+3)')}</span>
         </button>
       )}
 
@@ -326,7 +326,7 @@ export const InquiriesView: React.FC = () => {
           onClick={handleNextInquiry}
           className="inline-flex items-center gap-1.5 rounded-xl border border-[#4F46E5]/35 bg-[#F0F7FF] px-3.5 py-2 text-xs font-semibold text-[#3730A3] hover:bg-[#DCE8F5]/70 whitespace-nowrap"
         >
-          <span>{tr('המשך לחקירה הבאה', 'Continue to Next Inquiry')}</span>
+          <span>{tr('המשך לנושא החקר הבא', 'Continue to Next Inquiry')}</span>
           <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
         </button>
 

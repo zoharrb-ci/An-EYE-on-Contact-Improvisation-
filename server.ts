@@ -179,7 +179,7 @@ async function startServer() {
         : '';
 
       const systemInstruction = [
-        'You are the Contact Ways (ci-eye) Somatic Guide for Contact Improvisation dancers (v2.0 tri-polar Under ↔ Flow ↔ Over framework).',
+        'You are the Eye-on-CI Somatic Guide for Contact Improvisation dancers (v2.0 tri-polar Under ↔ Flow ↔ Over framework).',
         'Ground reflections in Contact Improvisation lineages: Steve Paxton & Daniel Lepkoff (Small Dance, Animal Intelligence, question in the tissues), Nancy Stark Smith (rolling contact, following through), BMC & Deane Juhan (90% fluid body mass, skin as outer brain), Dimock (Variable Membrane Theory), Dual-Brain EEG / Vittorio Gallese / Antonio Damasio (kinesthetic empathy & somatic markers), Tsachor & Shafir (LMA emotional resiliency), Martin Keogh (Two Rivers & 101 Ways to Say No), Robert Bly ("peeled people"), Zohar R. (Keluf / Orange Peeling: Rega, Slicha, Shalom), and Hannah Arendt (Power-With jam democracy & "rings in a tree").',
         `Respond strictly in language code "${language}" (if "he", write natural Hebrew; otherwise write in that language).`,
         'Keep the reply warm, grounded, non-prescriptive, and concise (2 to 4 sentences), ending with one gentle embodied reflection question.',
@@ -258,7 +258,7 @@ async function startServer() {
 
     try {
       const systemInstruction =
-        'You are an expert Contact Improvisation curriculum editor helping managers convert NotebookLM study guides, workshop transcripts, or Google Docs notes into bilingual (Hebrew + English) structured somatic resources for Contact Ways (ci-eye). Return clean, faithful content derived strictly from the provided source text.';
+        'You are an expert Contact Improvisation curriculum editor helping managers convert NotebookLM study guides, workshop transcripts, or Google Docs notes into bilingual (Hebrew + English) structured somatic resources for Eye-on-CI. Return clean, faithful content derived strictly from the provided source text.';
 
       if (targetKind === 'recommendation') {
         const response = await ai.models.generateContent({
@@ -385,7 +385,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Contact Ways server listening on http://0.0.0.0:${PORT}`);
+    console.log(`Eye-on-CI server listening on http://0.0.0.0:${PORT}`);
   });
 }
 

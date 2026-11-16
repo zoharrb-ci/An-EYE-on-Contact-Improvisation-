@@ -92,7 +92,7 @@ export const HomeView: React.FC = () => {
       {/* Large Enlarged Logo with Generous Breathing Space */}
       <div className="flex flex-col items-center gap-4">
         <BrandLogo
-          alt={siteConfig.brandName || 'Contact Ways'}
+          alt={siteConfig.brandName || 'Eye-on-CI'}
           className="h-28 w-28 object-contain sm:h-36 sm:w-36"
         />
         <span className="font-display text-sm font-semibold tracking-wide text-[#475569]/80">

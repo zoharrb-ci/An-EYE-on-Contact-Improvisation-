@@ -31,7 +31,7 @@ const TAB_LABELS: Record<AppNavTab, { he: string; en: string }> = {
   home: { he: 'ראשי', en: 'Home' },
   reflection: { he: '+תעוד', en: '+Log' },
   records: { he: 'יומן תנועה', en: 'Journal' },
-  inquiries: { he: 'חקירות', en: 'Inquiries' },
+  inquiries: { he: 'חקר', en: 'Inquiries' },
   progress: { he: 'כאן ועכשיו', en: 'Here & Now' },
   profile: { he: 'פרופיל', en: 'Profile' },
   manager: { he: 'סטודיו מנהל', en: 'Manager Studio' },

@@ -1,6 +1,6 @@
 {
-  "name": "contact-ways",
-  "description": "Contact Ways (ci-eye) v2.0 — Somatic Contact Improvisation Reflection Suite",
+  "name": "eye-on-ci",
+  "description": "Eye-on-CI v2.0 — Somatic Contact Improvisation Reflection Suite",
   "private": true,
   "version": "2.0.0",
   "type": "module",
