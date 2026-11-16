@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Info, PlusCircle } from 'lucide-react';
 import { useContactWays } from '../context/ContactWaysContext';
 import { BrandLogo } from '../components/BrandLogo';
+import { PWAInstallShortcut } from '../components/PWAInstallShortcut';
 
 interface HereAndNowQuote {
   titleHe: string;
@@ -123,7 +124,7 @@ export const HomeView: React.FC = () => {
         </blockquote>
       </div>
 
-      {/* Calm Invitation to Add a Log */}
+      {/* Calm Invitation to Add a Log + Install Shortcut Button */}
       <div className="flex flex-col items-center gap-3">
         <button
           type="button"
@@ -136,6 +137,8 @@ export const HomeView: React.FC = () => {
           <PlusCircle className="h-4 w-4" />
           <span>{tr('הזמנה להוספת תיעוד', 'Add Movement Reflection')}</span>
         </button>
+
+        <PWAInstallShortcut />
       </div>
     </div>
   );
