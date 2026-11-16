@@ -1,0 +1,647 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Helpers ---
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function userEmailLower() {
+      return request.auth.token.email != null ? request.auth.token.email.lower() : '';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidEmailId(id) {
+      return id is string && id.size() >= 5 && id.size() <= 128 && id.matches('^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$');
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isBootstrappedSuperManager() {
+      return isVerifiedUser() && userEmailLower() == 'zoharrb@gmail.com';
+    }
+
+    function managerDocExists(email) {
+      return exists(/databases/$(database)/documents/managers/$(email));
+    }
+
+    function managerDoc(email) {
+      return get(/databases/$(database)/documents/managers/$(email)).data;
+    }
+
+    function isSuperManager() {
+      return isBootstrappedSuperManager() || (
+        isVerifiedUser() &&
+        userEmailLower() != '' &&
+        managerDocExists(userEmailLower()) &&
+        managerDoc(userEmailLower()).active == true &&
+        managerDoc(userEmailLower()).role == 'super_manager'
+      );
+    }
+
+    function isActiveManager() {
+      return isSuperManager() || (
+        isVerifiedUser() &&
+        userEmailLower() != '' &&
+        managerDocExists(userEmailLower()) &&
+        managerDoc(userEmailLower()).active == true
+      );
+    }
+
+    function hasManagerPrivilege(privKey) {
+      return isSuperManager() || (
+        isVerifiedUser() &&
+        userEmailLower() != '' &&
+        managerDocExists(userEmailLower()) &&
+        managerDoc(userEmailLower()).active == true &&
+        managerDoc(userEmailLower()).privileges[privKey] == true
+      );
+    }
+
+    function canAuthorSourceType(sourceType, editPriv) {
+      return hasManagerPrivilege(editPriv) || (
+        sourceType != 'manual' && hasManagerPrivilege('importTextAndNotebookLM')
+      );
+    }
+
+    function isStringBounded(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function isBoundedStringList(arr, maxLen) {
+      return arr is list && arr.size() <= maxLen && (arr.size() == 0 || arr[0] is string);
+    }
+
+    function isValidPersonalJourney(j) {
+      return j is map &&
+        j.keys().hasAll([
+          'curiosityIds', 'statement', 'horizon', 'supportNeeds',
+          'hereAndNowTone', 'hereAndNowNote', 'supportMoments'
+        ]) &&
+        j.keys().hasOnly([
+          'curiosityIds', 'statement', 'horizon', 'supportNeeds',
+          'hereAndNowTone', 'hereAndNowNote', 'supportMoments'
+        ]) &&
+        isBoundedStringList(j.curiosityIds, 10) &&
+        isStringBounded(j.statement, 0, 400) &&
+        j.horizon in ['today', 'this_week', 'next_jams', 'open'] &&
+        isBoundedStringList(j.supportNeeds, 10) &&
+        j.hereAndNowTone in ['calm', 'curious', 'tender', 'energized', 'grounded'] &&
+        isStringBounded(j.hereAndNowNote, 0, 500) &&
+        j.supportMoments is list && j.supportMoments.size() <= 30;
+    }
+
+    // --- Validation Blueprints ---
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'name', 'levelTitle', 'bio', 'yearsDanced', 'primaryRole',
+          'touchPreference', 'activeIntentions', 'totalJamHours', 'currentStreakWeeks',
+          'completedInquiriesCount', 'savedRecordsCount', 'preferredRecordMode',
+          'preferredConversationMode', 'preferredLanguage', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'name', 'levelTitle', 'bio', 'yearsDanced', 'primaryRole',
+          'touchPreference', 'activeIntentions', 'totalJamHours', 'currentStreakWeeks',
+          'completedInquiriesCount', 'savedRecordsCount', 'preferredRecordMode',
+          'preferredConversationMode', 'preferredLanguage', 'personalJourney', 'createdAt', 'updatedAt'
+        ]) &&
+        data.uid == userId &&
+        isStringBounded(data.uid, 1, 128) &&
+        isStringBounded(data.name, 1, 120) &&
+        isStringBounded(data.levelTitle, 0, 160) &&
+        isStringBounded(data.bio, 0, 1200) &&
+        (data.yearsDanced is number || data.yearsDanced is int) &&
+        data.yearsDanced >= 0 && data.yearsDanced <= 100 &&
+        isStringBounded(data.primaryRole, 0, 120) &&
+        isStringBounded(data.touchPreference, 0, 240) &&
+        isBoundedStringList(data.activeIntentions, 10) &&
+        (data.totalJamHours is number || data.totalJamHours is int) &&
+        data.totalJamHours >= 0 &&
+        data.currentStreakWeeks is int && data.currentStreakWeeks >= 0 &&
+        data.completedInquiriesCount is int && data.completedInquiriesCount >= 0 &&
+        data.savedRecordsCount is int && data.savedRecordsCount >= 0 &&
+        data.preferredRecordMode in ['cards', 'timeline', 'categorized', 'compact'] &&
+        data.preferredConversationMode in ['chat', 'accordion', 'insights', 'flashcards'] &&
+        isStringBounded(data.preferredLanguage, 2, 10) &&
+        (!('personalJourney' in data) || isValidPersonalJourney(data.personalJourney));
+    }
+
+    function isValidAxisBalances(b) {
+      return b is map &&
+        b.keys().hasAll(['mechanics', 'perception', 'behavior', 'emotion', 'ethics']) &&
+        b.keys().hasOnly(['mechanics', 'perception', 'behavior', 'emotion', 'ethics']) &&
+        (b.mechanics is number || b.mechanics is int) && b.mechanics >= -5 && b.mechanics <= 5 &&
+        (b.perception is number || b.perception is int) && b.perception >= -5 && b.perception <= 5 &&
+        (b.behavior is number || b.behavior is int) && b.behavior >= -5 && b.behavior <= 5 &&
+        (b.emotion is number || b.emotion is int) && b.emotion >= -5 && b.emotion <= 5 &&
+        (b.ethics is number || b.ethics is int) && b.ethics >= -5 && b.ethics <= 5;
+    }
+
+    function isValidFlaggedParameters(arr) {
+      return arr is list && arr.size() <= 30 && (
+        arr.size() == 0 || (
+          arr[0] is map &&
+          arr[0].keys().hasAll(['paramId', 'state']) &&
+          arr[0].keys().hasOnly(['paramId', 'state']) &&
+          isStringBounded(arr[0].paramId, 1, 64) &&
+          arr[0].state in ['under', 'flow', 'over']
+        )
+      );
+    }
+
+    function isValidMovementRecord(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'id', 'title', 'dateStr', 'jamOrWorkshop', 'partner',
+          'durationMinutes', 'pillarCategory', 'contactPoints', 'weightSharingLevel',
+          'attunementLevel', 'boundaryClarityLevel', 'fallingMomentumLevel',
+          'groundingLevel', 'tactileAttentionLevel', 'twoRiversState',
+          'reflectionNotes', 'keyTakeaway', 'somaticSensations', 'timestampMs',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'id', 'title', 'dateStr', 'jamOrWorkshop', 'partner',
+          'durationMinutes', 'pillarCategory', 'contactPoints', 'weightSharingLevel',
+          'attunementLevel', 'boundaryClarityLevel', 'fallingMomentumLevel',
+          'groundingLevel', 'tactileAttentionLevel', 'reflectionMode', 'axisBalances',
+          'flaggedParameters', 'twoRiversState', 'kelufState', 'reflectionNotes',
+          'keyTakeaway', 'somaticSensations', 'intentionCheckIn', 'timestampMs',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.uid == userId &&
+        isValidId(data.id) &&
+        isStringBounded(data.title, 1, 200) &&
+        isStringBounded(data.dateStr, 1, 60) &&
+        isStringBounded(data.jamOrWorkshop, 0, 160) &&
+        isStringBounded(data.partner, 0, 120) &&
+        data.durationMinutes is int && data.durationMinutes >= 1 && data.durationMinutes <= 1440 &&
+        isStringBounded(data.pillarCategory, 1, 80) &&
+        isBoundedStringList(data.contactPoints, 12) &&
+        (data.weightSharingLevel is number || data.weightSharingLevel is int) &&
+        (data.attunementLevel is number || data.attunementLevel is int) &&
+        (data.boundaryClarityLevel is number || data.boundaryClarityLevel is int) &&
+        (data.fallingMomentumLevel is number || data.fallingMomentumLevel is int) &&
+        (data.groundingLevel is number || data.groundingLevel is int) &&
+        (data.tactileAttentionLevel is number || data.tactileAttentionLevel is int) &&
+        (!('reflectionMode' in data) || data.reflectionMode in ['quick', 'deep']) &&
+        (!('axisBalances' in data) || isValidAxisBalances(data.axisBalances)) &&
+        (!('flaggedParameters' in data) || isValidFlaggedParameters(data.flaggedParameters)) &&
+        isStringBounded(data.twoRiversState, 1, 120) &&
+        (!('kelufState' in data) || isStringBounded(data.kelufState, 0, 120)) &&
+        isStringBounded(data.reflectionNotes, 0, 4000) &&
+        isStringBounded(data.keyTakeaway, 0, 600) &&
+        isBoundedStringList(data.somaticSensations, 12) &&
+        (!('intentionCheckIn' in data) || isStringBounded(data.intentionCheckIn, 0, 200)) &&
+        data.timestampMs is int;
+    }
+
+    function isValidUserInquiry(data, userId) {
+      return data.keys().hasAll(['uid', 'inquiryId', 'messages', 'summaryInsights', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'inquiryId', 'messages', 'summaryInsights', 'createdAt', 'updatedAt']) &&
+        data.uid == userId &&
+        isValidId(data.inquiryId) &&
+        data.messages is list && data.messages.size() <= 100 &&
+        isBoundedStringList(data.summaryInsights, 30);
+    }
+
+    function isValidManagerAccount(data, managerEmail) {
+      return data.keys().hasAll(['email', 'displayName', 'role', 'active', 'privileges', 'addedBy', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['email', 'displayName', 'role', 'active', 'privileges', 'addedBy', 'createdAt', 'updatedAt']) &&
+        isValidEmailId(data.email) &&
+        data.email == managerEmail &&
+        isStringBounded(data.displayName, 1, 120) &&
+        data.role in ['manager', 'super_manager'] &&
+        data.active is bool &&
+        data.privileges is map &&
+        data.privileges.keys().hasAll(['editRecommendationsAndGuides', 'editInquiriesAndFlashcards', 'importTextAndNotebookLM']) &&
+        data.privileges.keys().hasOnly(['editRecommendationsAndGuides', 'editInquiriesAndFlashcards', 'importTextAndNotebookLM']) &&
+        data.privileges.editRecommendationsAndGuides is bool &&
+        data.privileges.editInquiriesAndFlashcards is bool &&
+        data.privileges.importTextAndNotebookLM is bool &&
+        isStringBounded(data.addedBy, 1, 128) &&
+        (managerEmail != 'zoharrb@gmail.com' || (data.role == 'super_manager' && data.active == true));
+    }
+
+    function isValidCuratedRecommendation(data) {
+      return data.keys().hasAll([
+          'id', 'shortTitle', 'shortTitleEn', 'subtitleTag', 'subtitleTagEn',
+          'axisType', 'summaryPreview', 'fullExplanation', 'fullExplanationEn',
+          'practicalSteps', 'practicalStepsEn', 'quoteText', 'quoteTextEn',
+          'quoteAuthor', 'quoteAuthorEn', 'hasInteractivePractice',
+          'sourceType', 'sourceTitle', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'shortTitle', 'shortTitleEn', 'subtitleTag', 'subtitleTagEn',
+          'axisType', 'summaryPreview', 'fullExplanation', 'fullExplanationEn',
+          'practicalSteps', 'practicalStepsEn', 'quoteText', 'quoteTextEn',
+          'quoteAuthor', 'quoteAuthorEn', 'hasInteractivePractice', 'scoreId',
+          'sourceType', 'sourceTitle', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.id) &&
+        isStringBounded(data.shortTitle, 1, 160) &&
+        isStringBounded(data.shortTitleEn, 1, 160) &&
+        isStringBounded(data.subtitleTag, 1, 160) &&
+        isStringBounded(data.subtitleTagEn, 1, 160) &&
+        data.axisType in [
+          'mechanics', 'perception', 'behavior', 'emotion', 'ethics',
+          'ATTUNEMENT', 'WEIGHT_SHARING', 'BOUNDARIES', 'FALLING_MOMENTUM', 'GROUNDING', 'TACTILE_ATTENTION'
+        ] &&
+        isStringBounded(data.summaryPreview, 1, 240) &&
+        isStringBounded(data.fullExplanation, 1, 4000) &&
+        isStringBounded(data.fullExplanationEn, 1, 4000) &&
+        isBoundedStringList(data.practicalSteps, 12) &&
+        isBoundedStringList(data.practicalStepsEn, 12) &&
+        isStringBounded(data.quoteText, 0, 600) &&
+        isStringBounded(data.quoteTextEn, 0, 600) &&
+        isStringBounded(data.quoteAuthor, 0, 140) &&
+        isStringBounded(data.quoteAuthorEn, 0, 140) &&
+        data.hasInteractivePractice is bool &&
+        (!('scoreId' in data) || (isStringBounded(data.scoreId, 0, 64) && data.scoreId in ['', 'small_dance', 'sensory_tuning', 'two_rivers', 'keluf', 'lma_resiliency', 'clinic_1on1'])) &&
+        data.sourceType in ['manual', 'text_upload', 'google_doc', 'notebooklm'] &&
+        isStringBounded(data.sourceTitle, 0, 200) &&
+        isStringBounded(data.authorEmail, 3, 128) &&
+        data.authorEmail == userEmailLower();
+    }
+
+    function isValidCuratedInquiry(data) {
+      return data.keys().hasAll([
+          'id', 'title', 'titleEn', 'category', 'categoryEn', 'subtitle', 'subtitleEn',
+          'dateStr', 'relatedStudyQuestion', 'relatedStudyQuestionEn',
+          'somaticPrinciple', 'somaticPrincipleEn', 'authorReference',
+          'summaryInsights', 'summaryInsightsEn', 'initialGuidePrompt', 'initialGuidePromptEn',
+          'sourceType', 'sourceTitle', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'title', 'titleEn', 'category', 'categoryEn', 'subtitle', 'subtitleEn',
+          'dateStr', 'relatedStudyQuestion', 'relatedStudyQuestionEn',
+          'somaticPrinciple', 'somaticPrincipleEn', 'authorReference',
+          'summaryInsights', 'summaryInsightsEn', 'initialGuidePrompt', 'initialGuidePromptEn',
+          'sourceType', 'sourceTitle', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.id) &&
+        isStringBounded(data.title, 1, 200) &&
+        isStringBounded(data.titleEn, 1, 200) &&
+        isStringBounded(data.category, 1, 100) &&
+        isStringBounded(data.categoryEn, 1, 100) &&
+        isStringBounded(data.subtitle, 0, 240) &&
+        isStringBounded(data.subtitleEn, 0, 240) &&
+        isStringBounded(data.dateStr, 1, 60) &&
+        isStringBounded(data.relatedStudyQuestion, 1, 500) &&
+        isStringBounded(data.relatedStudyQuestionEn, 1, 500) &&
+        isStringBounded(data.somaticPrinciple, 1, 800) &&
+        isStringBounded(data.somaticPrincipleEn, 1, 800) &&
+        isStringBounded(data.authorReference, 0, 160) &&
+        isBoundedStringList(data.summaryInsights, 12) &&
+        isBoundedStringList(data.summaryInsightsEn, 12) &&
+        isStringBounded(data.initialGuidePrompt, 1, 1200) &&
+        isStringBounded(data.initialGuidePromptEn, 1, 1200) &&
+        data.sourceType in ['manual', 'text_upload', 'google_doc', 'notebooklm'] &&
+        isStringBounded(data.sourceTitle, 0, 200) &&
+        isStringBounded(data.authorEmail, 3, 128) &&
+        data.authorEmail == userEmailLower();
+    }
+
+    function isValidCuratedGuideTopic(data) {
+      return data.keys().hasAll([
+          'id', 'topicKey', 'title', 'titleEn', 'subtitle', 'subtitleEn',
+          'explanation', 'explanationEn', 'practicalTips', 'practicalTipsEn',
+          'reflectionQuestion', 'reflectionQuestionEn',
+          'sourceType', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'topicKey', 'title', 'titleEn', 'subtitle', 'subtitleEn',
+          'explanation', 'explanationEn', 'practicalTips', 'practicalTipsEn',
+          'reflectionQuestion', 'reflectionQuestionEn',
+          'sourceType', 'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.id) &&
+        isStringBounded(data.topicKey, 1, 64) &&
+        isStringBounded(data.title, 1, 200) &&
+        isStringBounded(data.titleEn, 1, 200) &&
+        isStringBounded(data.subtitle, 0, 240) &&
+        isStringBounded(data.subtitleEn, 0, 240) &&
+        isStringBounded(data.explanation, 1, 4000) &&
+        isStringBounded(data.explanationEn, 1, 4000) &&
+        isBoundedStringList(data.practicalTips, 10) &&
+        isBoundedStringList(data.practicalTipsEn, 10) &&
+        isStringBounded(data.reflectionQuestion, 0, 400) &&
+        isStringBounded(data.reflectionQuestionEn, 0, 400) &&
+        data.sourceType in ['manual', 'text_upload', 'google_doc', 'notebooklm'] &&
+        isStringBounded(data.authorEmail, 3, 128) &&
+        data.authorEmail == userEmailLower();
+    }
+
+    function isValidSiteConfig(data) {
+      return data.keys().hasAll([
+          'id', 'brandName', 'brandTaglineHe', 'brandTaglineEn',
+          'homeKickerHe', 'homeKickerEn', 'homeTitleHe', 'homeTitleEn',
+          'homeSubtitleHe', 'homeSubtitleEn', 'practiceSectionTitleHe', 'practiceSectionTitleEn',
+          'aboutTitleHe', 'aboutTitleEn', 'aboutDescriptionHe', 'aboutDescriptionEn',
+          'aboutPhilosophyHe', 'aboutPhilosophyEn', 'developerName',
+          'developerRoleHe', 'developerRoleEn', 'developerEmail', 'developerWebsite',
+          'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'brandName', 'brandTaglineHe', 'brandTaglineEn',
+          'homeKickerHe', 'homeKickerEn', 'homeTitleHe', 'homeTitleEn',
+          'homeSubtitleHe', 'homeSubtitleEn', 'practiceSectionTitleHe', 'practiceSectionTitleEn',
+          'aboutTitleHe', 'aboutTitleEn', 'aboutDescriptionHe', 'aboutDescriptionEn',
+          'aboutPhilosophyHe', 'aboutPhilosophyEn', 'developerName',
+          'developerRoleHe', 'developerRoleEn', 'developerEmail', 'developerWebsite',
+          'authorEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.id == 'main' &&
+        isStringBounded(data.brandName, 1, 120) &&
+        isStringBounded(data.brandTaglineHe, 0, 160) &&
+        isStringBounded(data.brandTaglineEn, 0, 160) &&
+        isStringBounded(data.homeKickerHe, 0, 160) &&
+        isStringBounded(data.homeKickerEn, 0, 160) &&
+        isStringBounded(data.homeTitleHe, 1, 200) &&
+        isStringBounded(data.homeTitleEn, 1, 200) &&
+        isStringBounded(data.homeSubtitleHe, 0, 600) &&
+        isStringBounded(data.homeSubtitleEn, 0, 600) &&
+        isStringBounded(data.practiceSectionTitleHe, 1, 160) &&
+        isStringBounded(data.practiceSectionTitleEn, 1, 160) &&
+        isStringBounded(data.aboutTitleHe, 1, 200) &&
+        isStringBounded(data.aboutTitleEn, 1, 200) &&
+        isStringBounded(data.aboutDescriptionHe, 0, 3000) &&
+        isStringBounded(data.aboutDescriptionEn, 0, 3000) &&
+        isStringBounded(data.aboutPhilosophyHe, 0, 1500) &&
+        isStringBounded(data.aboutPhilosophyEn, 0, 1500) &&
+        isStringBounded(data.developerName, 1, 120) &&
+        isStringBounded(data.developerRoleHe, 0, 160) &&
+        isStringBounded(data.developerRoleEn, 0, 160) &&
+        isStringBounded(data.developerEmail, 0, 160) &&
+        isStringBounded(data.developerWebsite, 0, 300) &&
+        isStringBounded(data.authorEmail, 3, 128) &&
+        data.authorEmail == userEmailLower();
+    }
+
+    function isValidUserFeedback(data) {
+      return data.keys().hasAll([
+          'id', 'uid', 'senderName', 'senderEmail', 'category', 'message',
+          'rating', 'pageContext', 'status', 'managerNote', 'createdAtMs',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'id', 'uid', 'senderName', 'senderEmail', 'category', 'message',
+          'rating', 'pageContext', 'status', 'managerNote', 'createdAtMs',
+          'createdAt', 'updatedAt'
+        ]) &&
+        isValidId(data.id) &&
+        isStringBounded(data.uid, 1, 128) &&
+        isStringBounded(data.senderName, 1, 120) &&
+        isStringBounded(data.senderEmail, 0, 160) &&
+        data.category in ['idea', 'bug', 'content', 'general'] &&
+        isStringBounded(data.message, 3, 3000) &&
+        data.rating is int && data.rating >= 0 && data.rating <= 5 &&
+        isStringBounded(data.pageContext, 1, 80) &&
+        data.status in ['new', 'reviewed', 'resolved'] &&
+        isStringBounded(data.managerNote, 0, 1200) &&
+        data.createdAtMs is int && data.createdAtMs > 0;
+    }
+
+    // --- Collection Rules ---
+    match /users/{userId}/profile/{docId} {
+      allow get: if docId == 'main' && isOwner(userId);
+      allow list: if false;
+      allow create: if docId == 'main' &&
+        isOwner(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if docId == 'main' &&
+        isOwner(userId) &&
+        isValidUserProfile(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'levelTitle', 'bio', 'yearsDanced', 'primaryRole',
+          'touchPreference', 'activeIntentions', 'totalJamHours', 'currentStreakWeeks',
+          'completedInquiriesCount', 'savedRecordsCount', 'preferredRecordMode',
+          'preferredConversationMode', 'preferredLanguage', 'personalJourney', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/records/{recordId} {
+      allow get: if isValidId(recordId) && isOwner(userId);
+      allow list: if isOwner(userId) && resource.data.uid == request.auth.uid;
+      allow create: if isValidId(recordId) &&
+        isOwner(userId) &&
+        isValidMovementRecord(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(recordId) &&
+        isOwner(userId) &&
+        isValidMovementRecord(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'dateStr', 'jamOrWorkshop', 'partner', 'durationMinutes',
+          'pillarCategory', 'contactPoints', 'weightSharingLevel', 'attunementLevel',
+          'boundaryClarityLevel', 'fallingMomentumLevel', 'groundingLevel',
+          'tactileAttentionLevel', 'reflectionMode', 'axisBalances', 'flaggedParameters',
+          'twoRiversState', 'kelufState', 'reflectionNotes',
+          'keyTakeaway', 'somaticSensations', 'intentionCheckIn', 'updatedAt'
+        ]);
+      allow delete: if isValidId(recordId) && isOwner(userId);
+    }
+
+    match /users/{userId}/inquiries/{inquiryId} {
+      allow get: if isValidId(inquiryId) && isOwner(userId);
+      allow list: if isOwner(userId) && resource.data.uid == request.auth.uid;
+      allow create: if isValidId(inquiryId) &&
+        isOwner(userId) &&
+        isValidUserInquiry(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(inquiryId) &&
+        isOwner(userId) &&
+        isValidUserInquiry(incoming(), userId) &&
+        incoming().uid == existing().uid &&
+        incoming().inquiryId == existing().inquiryId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['messages', 'summaryInsights', 'updatedAt']);
+      allow delete: if isValidId(inquiryId) && isOwner(userId);
+    }
+
+    match /managers/{managerEmail} {
+      allow get: if isValidEmailId(managerEmail) && isVerifiedUser() && (userEmailLower() == managerEmail || isSuperManager());
+      allow list: if isBootstrappedSuperManager();
+      allow create: if isValidEmailId(managerEmail) &&
+        isSuperManager() &&
+        isValidManagerAccount(incoming(), managerEmail) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidEmailId(managerEmail) &&
+        isSuperManager() &&
+        isValidManagerAccount(incoming(), managerEmail) &&
+        incoming().email == existing().email &&
+        incoming().addedBy == existing().addedBy &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'role', 'active', 'privileges', 'updatedAt']);
+      allow delete: if isValidEmailId(managerEmail) &&
+        isSuperManager() &&
+        managerEmail != 'zoharrb@gmail.com';
+    }
+
+    match /curated_recommendations/{recId} {
+      allow get: if isValidId(recId);
+      allow list: if true;
+      allow create: if isValidId(recId) &&
+        canAuthorSourceType(incoming().sourceType, 'editRecommendationsAndGuides') &&
+        isValidCuratedRecommendation(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(recId) &&
+        canAuthorSourceType(incoming().sourceType, 'editRecommendationsAndGuides') &&
+        isValidCuratedRecommendation(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'shortTitle', 'shortTitleEn', 'subtitleTag', 'subtitleTagEn',
+          'axisType', 'summaryPreview', 'fullExplanation', 'fullExplanationEn',
+          'practicalSteps', 'practicalStepsEn', 'quoteText', 'quoteTextEn',
+          'quoteAuthor', 'quoteAuthorEn', 'hasInteractivePractice', 'scoreId',
+          'sourceType', 'sourceTitle', 'authorEmail', 'updatedAt'
+        ]);
+      allow delete: if isValidId(recId) && isSuperManager();
+    }
+
+    match /curated_inquiries/{inquiryId} {
+      allow get: if isValidId(inquiryId);
+      allow list: if true;
+      allow create: if isValidId(inquiryId) &&
+        canAuthorSourceType(incoming().sourceType, 'editInquiriesAndFlashcards') &&
+        isValidCuratedInquiry(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(inquiryId) &&
+        canAuthorSourceType(incoming().sourceType, 'editInquiriesAndFlashcards') &&
+        isValidCuratedInquiry(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'titleEn', 'category', 'categoryEn', 'subtitle', 'subtitleEn',
+          'dateStr', 'relatedStudyQuestion', 'relatedStudyQuestionEn',
+          'somaticPrinciple', 'somaticPrincipleEn', 'authorReference',
+          'summaryInsights', 'summaryInsightsEn', 'initialGuidePrompt', 'initialGuidePromptEn',
+          'sourceType', 'sourceTitle', 'authorEmail', 'updatedAt'
+        ]);
+      allow delete: if isValidId(inquiryId) && isSuperManager();
+    }
+
+    match /curated_guides/{guideId} {
+      allow get: if isValidId(guideId);
+      allow list: if true;
+      allow create: if isValidId(guideId) &&
+        canAuthorSourceType(incoming().sourceType, 'editRecommendationsAndGuides') &&
+        isValidCuratedGuideTopic(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(guideId) &&
+        canAuthorSourceType(incoming().sourceType, 'editRecommendationsAndGuides') &&
+        isValidCuratedGuideTopic(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'topicKey', 'title', 'titleEn', 'subtitle', 'subtitleEn',
+          'explanation', 'explanationEn', 'practicalTips', 'practicalTipsEn',
+          'reflectionQuestion', 'reflectionQuestionEn',
+          'sourceType', 'authorEmail', 'updatedAt'
+        ]);
+      allow delete: if isValidId(guideId) && isSuperManager();
+    }
+
+    match /site_config/{configId} {
+      allow get: if configId == 'main';
+      allow list: if false;
+      allow create: if configId == 'main' &&
+        hasManagerPrivilege('editRecommendationsAndGuides') &&
+        isValidSiteConfig(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if configId == 'main' &&
+        hasManagerPrivilege('editRecommendationsAndGuides') &&
+        isValidSiteConfig(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'brandName', 'brandTaglineHe', 'brandTaglineEn',
+          'homeKickerHe', 'homeKickerEn', 'homeTitleHe', 'homeTitleEn',
+          'homeSubtitleHe', 'homeSubtitleEn', 'practiceSectionTitleHe', 'practiceSectionTitleEn',
+          'aboutTitleHe', 'aboutTitleEn', 'aboutDescriptionHe', 'aboutDescriptionEn',
+          'aboutPhilosophyHe', 'aboutPhilosophyEn', 'developerName',
+          'developerRoleHe', 'developerRoleEn', 'developerEmail', 'developerWebsite',
+          'authorEmail', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /user_feedback/{feedbackId} {
+      allow get: if isValidId(feedbackId) && (
+        isActiveManager() ||
+        (isVerifiedUser() && existing().uid == request.auth.uid)
+      );
+      allow list: if isActiveManager() || (
+        isVerifiedUser() && resource.data.uid == request.auth.uid
+      );
+      allow create: if isValidId(feedbackId) &&
+        isVerifiedUser() &&
+        isValidUserFeedback(incoming()) &&
+        incoming().uid == request.auth.uid &&
+        incoming().status == 'new' &&
+        incoming().managerNote == '' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isValidId(feedbackId) &&
+        isActiveManager() &&
+        isValidUserFeedback(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().id == existing().id &&
+        incoming().senderName == existing().senderName &&
+        incoming().senderEmail == existing().senderEmail &&
+        incoming().category == existing().category &&
+        incoming().message == existing().message &&
+        incoming().rating == existing().rating &&
+        incoming().pageContext == existing().pageContext &&
+        incoming().createdAtMs == existing().createdAtMs &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'managerNote', 'updatedAt']);
+      allow delete: if isValidId(feedbackId) && isSuperManager();
+    }
+  }
+}

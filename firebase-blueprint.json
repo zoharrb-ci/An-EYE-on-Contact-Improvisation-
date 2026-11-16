@@ -1,0 +1,272 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Dancer profile, somatic preferences, and statistics stored privately per authenticated user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "levelTitle": { "type": "string", "maxLength": 160 },
+        "bio": { "type": "string", "maxLength": 1200 },
+        "yearsDanced": { "type": "number" },
+        "primaryRole": { "type": "string", "maxLength": 120 },
+        "touchPreference": { "type": "string", "maxLength": 240 },
+        "activeIntentions": { "type": "array", "maxLength": 10 },
+        "totalJamHours": { "type": "number" },
+        "currentStreakWeeks": { "type": "integer" },
+        "completedInquiriesCount": { "type": "integer" },
+        "savedRecordsCount": { "type": "integer" },
+        "preferredRecordMode": { "type": "string", "enum": ["cards", "timeline", "categorized", "compact"] },
+        "preferredConversationMode": { "type": "string", "enum": ["chat", "accordion", "insights", "flashcards"] },
+        "preferredLanguage": { "type": "string", "maxLength": 10 },
+        "personalJourney": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "levelTitle", "bio", "yearsDanced", "primaryRole", "touchPreference", "activeIntentions", "totalJamHours", "currentStreakWeeks", "completedInquiriesCount", "savedRecordsCount", "preferredRecordMode", "preferredConversationMode", "preferredLanguage", "createdAt", "updatedAt"]
+    },
+    "MovementRecord": {
+      "title": "MovementRecord",
+      "description": "Individual Contact Improvisation reflection log supporting 5 tri-polar v2.0 axes (Under-Flow-Over), flagged parameters, and legacy 6-axis fields.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "dateStr": { "type": "string", "maxLength": 60 },
+        "jamOrWorkshop": { "type": "string", "maxLength": 160 },
+        "partner": { "type": "string", "maxLength": 120 },
+        "durationMinutes": { "type": "integer" },
+        "pillarCategory": { "type": "string", "maxLength": 80 },
+        "contactPoints": { "type": "array", "maxLength": 12 },
+        "weightSharingLevel": { "type": "number" },
+        "attunementLevel": { "type": "number" },
+        "boundaryClarityLevel": { "type": "number" },
+        "fallingMomentumLevel": { "type": "number" },
+        "groundingLevel": { "type": "number" },
+        "tactileAttentionLevel": { "type": "number" },
+        "reflectionMode": { "type": "string", "enum": ["quick", "deep"] },
+        "axisBalances": { "type": "object" },
+        "flaggedParameters": { "type": "array", "maxLength": 30 },
+        "twoRiversState": { "type": "string", "maxLength": 120 },
+        "kelufState": { "type": "string", "maxLength": 120 },
+        "reflectionNotes": { "type": "string", "maxLength": 4000 },
+        "keyTakeaway": { "type": "string", "maxLength": 600 },
+        "somaticSensations": { "type": "array", "maxLength": 12 },
+        "intentionCheckIn": { "type": "string", "maxLength": 200 },
+        "timestampMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "id", "title", "dateStr", "jamOrWorkshop", "partner", "durationMinutes", "pillarCategory", "contactPoints", "weightSharingLevel", "attunementLevel", "boundaryClarityLevel", "fallingMomentumLevel", "groundingLevel", "tactileAttentionLevel", "twoRiversState", "reflectionNotes", "keyTakeaway", "somaticSensations", "timestampMs", "createdAt", "updatedAt"]
+    },
+    "UserInquiryThread": {
+      "title": "UserInquiryThread",
+      "description": "User-specific inquiry dialogue additions and extracted insights.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "inquiryId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "messages": { "type": "array", "maxLength": 100 },
+        "summaryInsights": { "type": "array", "maxLength": 30 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "inquiryId", "messages", "summaryInsights", "createdAt", "updatedAt"]
+    },
+    "ManagerAccount": {
+      "title": "ManagerAccount",
+      "description": "Role-based access control entry for Managers and Super Managers.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["manager", "super_manager"] },
+        "active": { "type": "boolean" },
+        "privileges": { "type": "object" },
+        "addedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "role", "active", "privileges", "addedBy", "createdAt", "updatedAt"]
+    },
+    "CuratedRecommendation": {
+      "title": "CuratedRecommendation",
+      "description": "Shared Contact Improvisation recommendation published by Managers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "shortTitle": { "type": "string", "maxLength": 160 },
+        "shortTitleEn": { "type": "string", "maxLength": 160 },
+        "subtitleTag": { "type": "string", "maxLength": 160 },
+        "subtitleTagEn": { "type": "string", "maxLength": 160 },
+        "axisType": { "type": "string", "enum": ["mechanics", "perception", "behavior", "emotion", "ethics", "ATTUNEMENT", "WEIGHT_SHARING", "BOUNDARIES", "FALLING_MOMENTUM", "GROUNDING", "TACTILE_ATTENTION"] },
+        "summaryPreview": { "type": "string", "maxLength": 240 },
+        "fullExplanation": { "type": "string", "maxLength": 4000 },
+        "fullExplanationEn": { "type": "string", "maxLength": 4000 },
+        "practicalSteps": { "type": "array", "maxLength": 12 },
+        "practicalStepsEn": { "type": "array", "maxLength": 12 },
+        "quoteText": { "type": "string", "maxLength": 600 },
+        "quoteTextEn": { "type": "string", "maxLength": 600 },
+        "quoteAuthor": { "type": "string", "maxLength": 140 },
+        "quoteAuthorEn": { "type": "string", "maxLength": 140 },
+        "hasInteractivePractice": { "type": "boolean" },
+        "scoreId": { "type": "string", "maxLength": 64 },
+        "sourceType": { "type": "string", "enum": ["manual", "text_upload", "google_doc", "notebooklm"] },
+        "sourceTitle": { "type": "string", "maxLength": 200 },
+        "authorEmail": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "shortTitle", "shortTitleEn", "subtitleTag", "subtitleTagEn", "axisType", "summaryPreview", "fullExplanation", "fullExplanationEn", "practicalSteps", "practicalStepsEn", "quoteText", "quoteTextEn", "quoteAuthor", "quoteAuthorEn", "hasInteractivePractice", "sourceType", "sourceTitle", "authorEmail", "createdAt", "updatedAt"]
+    },
+    "CuratedInquiry": {
+      "title": "CuratedInquiry",
+      "description": "Shared Somatic Inquiry & Flashcard topic published by Managers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "maxLength": 200 },
+        "titleEn": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "maxLength": 100 },
+        "categoryEn": { "type": "string", "maxLength": 100 },
+        "subtitle": { "type": "string", "maxLength": 240 },
+        "subtitleEn": { "type": "string", "maxLength": 240 },
+        "dateStr": { "type": "string", "maxLength": 60 },
+        "relatedStudyQuestion": { "type": "string", "maxLength": 500 },
+        "relatedStudyQuestionEn": { "type": "string", "maxLength": 500 },
+        "somaticPrinciple": { "type": "string", "maxLength": 800 },
+        "somaticPrincipleEn": { "type": "string", "maxLength": 800 },
+        "authorReference": { "type": "string", "maxLength": 160 },
+        "summaryInsights": { "type": "array", "maxLength": 12 },
+        "summaryInsightsEn": { "type": "array", "maxLength": 12 },
+        "initialGuidePrompt": { "type": "string", "maxLength": 1200 },
+        "initialGuidePromptEn": { "type": "string", "maxLength": 1200 },
+        "sourceType": { "type": "string", "enum": ["manual", "text_upload", "google_doc", "notebooklm"] },
+        "sourceTitle": { "type": "string", "maxLength": 200 },
+        "authorEmail": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "titleEn", "category", "categoryEn", "subtitle", "subtitleEn", "dateStr", "relatedStudyQuestion", "relatedStudyQuestionEn", "somaticPrinciple", "somaticPrincipleEn", "authorReference", "summaryInsights", "summaryInsightsEn", "initialGuidePrompt", "initialGuidePromptEn", "sourceType", "sourceTitle", "authorEmail", "createdAt", "updatedAt"]
+    },
+    "CuratedGuideTopic": {
+      "title": "CuratedGuideTopic",
+      "description": "Shared Somatic Guide note/override published by Managers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "topicKey": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 200 },
+        "titleEn": { "type": "string", "maxLength": 200 },
+        "subtitle": { "type": "string", "maxLength": 240 },
+        "subtitleEn": { "type": "string", "maxLength": 240 },
+        "explanation": { "type": "string", "maxLength": 4000 },
+        "explanationEn": { "type": "string", "maxLength": 4000 },
+        "practicalTips": { "type": "array", "maxLength": 10 },
+        "practicalTipsEn": { "type": "array", "maxLength": 10 },
+        "reflectionQuestion": { "type": "string", "maxLength": 400 },
+        "reflectionQuestionEn": { "type": "string", "maxLength": 400 },
+        "sourceType": { "type": "string", "enum": ["manual", "text_upload", "google_doc", "notebooklm"] },
+        "authorEmail": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "topicKey", "title", "titleEn", "subtitle", "subtitleEn", "explanation", "explanationEn", "practicalTips", "practicalTipsEn", "reflectionQuestion", "reflectionQuestionEn", "sourceType", "authorEmail", "createdAt", "updatedAt"]
+    },
+    "SiteConfig": {
+      "title": "SiteConfig",
+      "description": "Global site headings, subtitles, About text, and developer contact configuration managed by authorized Managers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 32 },
+        "brandName": { "type": "string", "maxLength": 120 },
+        "brandTaglineHe": { "type": "string", "maxLength": 160 },
+        "brandTaglineEn": { "type": "string", "maxLength": 160 },
+        "homeKickerHe": { "type": "string", "maxLength": 160 },
+        "homeKickerEn": { "type": "string", "maxLength": 160 },
+        "homeTitleHe": { "type": "string", "maxLength": 200 },
+        "homeTitleEn": { "type": "string", "maxLength": 200 },
+        "homeSubtitleHe": { "type": "string", "maxLength": 600 },
+        "homeSubtitleEn": { "type": "string", "maxLength": 600 },
+        "practiceSectionTitleHe": { "type": "string", "maxLength": 160 },
+        "practiceSectionTitleEn": { "type": "string", "maxLength": 160 },
+        "aboutTitleHe": { "type": "string", "maxLength": 200 },
+        "aboutTitleEn": { "type": "string", "maxLength": 200 },
+        "aboutDescriptionHe": { "type": "string", "maxLength": 3000 },
+        "aboutDescriptionEn": { "type": "string", "maxLength": 3000 },
+        "aboutPhilosophyHe": { "type": "string", "maxLength": 1500 },
+        "aboutPhilosophyEn": { "type": "string", "maxLength": 1500 },
+        "developerName": { "type": "string", "maxLength": 120 },
+        "developerRoleHe": { "type": "string", "maxLength": 160 },
+        "developerRoleEn": { "type": "string", "maxLength": 160 },
+        "developerEmail": { "type": "string", "maxLength": 160 },
+        "developerWebsite": { "type": "string", "maxLength": 300 },
+        "authorEmail": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "brandName", "brandTaglineHe", "brandTaglineEn", "homeKickerHe", "homeKickerEn", "homeTitleHe", "homeTitleEn", "homeSubtitleHe", "homeSubtitleEn", "practiceSectionTitleHe", "practiceSectionTitleEn", "aboutTitleHe", "aboutTitleEn", "aboutDescriptionHe", "aboutDescriptionEn", "aboutPhilosophyHe", "aboutPhilosophyEn", "developerName", "developerRoleHe", "developerRoleEn", "developerEmail", "developerWebsite", "authorEmail", "createdAt", "updatedAt"]
+    },
+    "UserFeedback": {
+      "title": "UserFeedback",
+      "description": "User feedback submission with optional manager review note and workflow status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "senderName": { "type": "string", "maxLength": 120 },
+        "senderEmail": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "enum": ["idea", "bug", "content", "general"] },
+        "message": { "type": "string", "maxLength": 3000 },
+        "rating": { "type": "integer" },
+        "pageContext": { "type": "string", "maxLength": 80 },
+        "status": { "type": "string", "enum": ["new", "reviewed", "resolved"] },
+        "managerNote": { "type": "string", "maxLength": 1200 },
+        "createdAtMs": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "uid", "senderName", "senderEmail", "category", "message", "rating", "pageContext", "status", "managerNote", "createdAtMs", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profile/{docId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private dancer profile and preferences for an authenticated user."
+    },
+    "/users/{userId}/records/{recordId}": {
+      "schema": { "$ref": "#/entities/MovementRecord" },
+      "description": "Private 6-axis movement reflection records owned by an authenticated user."
+    },
+    "/users/{userId}/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/UserInquiryThread" },
+      "description": "Private inquiry dialogue replies and insights for an authenticated user."
+    },
+    "/managers/{managerEmail}": {
+      "schema": { "$ref": "#/entities/ManagerAccount" },
+      "description": "Manager roster & privilege flags governed by Super Managers (zoharrb@gmail.com root)."
+    },
+    "/curated_recommendations/{recId}": {
+      "schema": { "$ref": "#/entities/CuratedRecommendation" },
+      "description": "Publicly readable somatic recommendations maintained by authorized Managers."
+    },
+    "/curated_inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/CuratedInquiry" },
+      "description": "Publicly readable somatic inquiries & flashcards maintained by authorized Managers."
+    },
+    "/curated_guides/{guideId}": {
+      "schema": { "$ref": "#/entities/CuratedGuideTopic" },
+      "description": "Publicly readable somatic guide topics maintained by authorized Managers."
+    },
+    "/site_config/{configId}": {
+      "schema": { "$ref": "#/entities/SiteConfig" },
+      "description": "Publicly readable global app titles, headings, About copy & developer contact maintained by authorized Managers."
+    },
+    "/user_feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/UserFeedback" },
+      "description": "Authenticated user feedback submissions readable by the submitting user and active Managers."
+    }
+  }
+}
